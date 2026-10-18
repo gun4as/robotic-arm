@@ -17,9 +17,12 @@ plauktos palika kaudze detaļu: RAMPS un SKR plates, draiveri, NEMA17 motori, ga
 Gadu gaitā tika izmēģināti visdažādākie kontrolieri un motori, un izmest to visu nebija prāta.
 Tā radās ideja: no tā, kas jau ir, uzbūvēt robotroku.
 
-<img src="docs/foto/printeris_alfred.webp" alt="Paša būvēts 3D printeris Original Alfred" width="320">
+| | | |
+|---|---|---|
+| ![Printeris ar alumīnija rāmi un RAMPS](docs/foto/printeris_alu_ramps.jpg) | ![Prusa i3 tipa printeris](docs/foto/printeris_prusa_i3.jpg) | ![Original Alfred](docs/foto/printeris_alfred.webp) |
+| **1.** Pirmais: alumīnija rāmis, RAMPS sānos — tāda pati plate, kas tagad vada roku | **2.** Otrais: pelēkais Prusa i3 tipa printeris | **3.** Trešais: melnais „Original Alfred” |
 
-*Viens no paša būvētajiem printeriem — „Original Alfred”.*
+*Paša būvētie printeri pēc kārtas.*
 
 Printera programmu rokai neizmantoju. Kopā ar AI asistentu Claude tika uzrakstīts savs firmware,
 kas strādā ar locītavām un grādiem, nevis XYZ asīm: gala slēdži ar HOME uz vidu, sinhronas kustības,

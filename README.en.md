@@ -19,9 +19,12 @@ shelves are still full of parts from those years: RAMPS and SKR boards, drivers,
 power supplies. Over time I experimented with all kinds of controllers and motors, and throwing it all
 away never felt right. So the idea was simple: build a robotic arm from what is already there.
 
-<img src="docs/foto/printeris_alfred.webp" alt="Self-built 3D printer Original Alfred" width="320">
+| | | |
+|---|---|---|
+| ![Printer with an aluminium frame and RAMPS](docs/foto/printeris_alu_ramps.jpg) | ![Prusa i3 style printer](docs/foto/printeris_prusa_i3.jpg) | ![Original Alfred](docs/foto/printeris_alfred.webp) |
+| **1.** The first one: aluminium frame with a RAMPS on the side, the same kind of board that now drives the arm | **2.** The second: a grey Prusa i3 style printer | **3.** The third: the black "Original Alfred" |
 
-*One of the self-built printers: "Original Alfred".*
+*The self-built printers, in order.*
 
 I didn't use printer firmware for the arm. Together with the AI assistant Claude, a dedicated firmware was
 written that works with joints and degrees instead of XYZ axes: endstops with HOME to the middle position,
