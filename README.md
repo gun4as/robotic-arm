@@ -17,6 +17,10 @@ plauktos palika kaudze detaļu: RAMPS un SKR plates, draiveri, NEMA17 motori, ga
 Gadu gaitā tika izmēģināti visdažādākie kontrolieri un motori, un izmest to visu nebija prāta.
 Tā radās ideja: no tā, kas jau ir, uzbūvēt robotroku.
 
+<img src="docs/foto/printeris_alfred.webp" alt="Paša būvēts 3D printeris Original Alfred" width="320">
+
+*Viens no paša būvētajiem printeriem — „Original Alfred”.*
+
 Printera programmu rokai neizmantoju. Kopā ar AI asistentu Claude tika uzrakstīts savs firmware,
 kas strādā ar locītavām un grādiem, nevis XYZ asīm: gala slēdži ar HOME uz vidu, sinhronas kustības,
 mācīšana un atskaņošana. Tas pats kods iet gan uz vecā RAMPS 1.4, gan uz SKR V1.4 Turbo.
@@ -32,8 +36,10 @@ lai saprastu, kas katrai locītavai der vislabāk.
 
 | | | |
 |---|---|---|
-| ![J1 pamatne](docs/foto/pamatne_j1.webp) | ![Reduktors uz motora](docs/foto/reduktors.webp) | ![RB 17HD0004-6](docs/foto/motors_17hd0004.webp) |
-| J1 pamatne ar gala slēdža turētāju | Drukāts reduktors uz motora | RB 17HD0004-6, partija 130403 — no printeru laikiem |
+| ![J1 pamatne](docs/foto/pamatne_j1.webp) | ![9:1 cikloidālais reduktors](docs/foto/reduktors_ciklo.webp) | ![4:1 planetārais reduktors](docs/foto/reduktors_planet.webp) |
+| J1 pamatne ar gala slēdža turētāju | Drukāts 9:1 cikloidālais reduktors | Drukāts 4:1 planetārais reduktors ar sešstūra vārpstu |
+| ![ACT Motor 17HM5417](docs/foto/motors_17hm5417.webp) | ![RB 17HD0004-6](docs/foto/motors_17hd0004.webp) | |
+| ACT Motor 17HM5417, 0.9°, 1.7 A | RB 17HD0004-6, partija 130403 — no printeru laikiem | |
 
 ```mermaid
 flowchart LR

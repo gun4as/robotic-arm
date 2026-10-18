@@ -19,6 +19,10 @@ shelves are still full of parts from those years: RAMPS and SKR boards, drivers,
 power supplies. Over time I experimented with all kinds of controllers and motors, and throwing it all
 away never felt right. So the idea was simple: build a robotic arm from what is already there.
 
+<img src="docs/foto/printeris_alfred.webp" alt="Self-built 3D printer Original Alfred" width="320">
+
+*One of the self-built printers: "Original Alfred".*
+
 I didn't use printer firmware for the arm. Together with the AI assistant Claude, a dedicated firmware was
 written that works with joints and degrees instead of XYZ axes: endstops with HOME to the middle position,
 synchronized moves, teach and playback. The same code runs on both the old RAMPS 1.4 and the SKR V1.4 Turbo.
@@ -35,8 +39,10 @@ each joint best.
 
 | | | |
 |---|---|---|
-| ![J1 base](docs/foto/pamatne_j1.webp) | ![Gearbox on a motor](docs/foto/reduktors.webp) | ![RB 17HD0004-6](docs/foto/motors_17hd0004.webp) |
-| J1 base with the endstop holder | 3D-printed gearbox on a motor | RB 17HD0004-6, lot 130403, left over from the printer days |
+| ![J1 base](docs/foto/pamatne_j1.webp) | ![9:1 cycloidal gearbox](docs/foto/reduktors_ciklo.webp) | ![4:1 planetary gearbox](docs/foto/reduktors_planet.webp) |
+| J1 base with the endstop holder | 3D-printed 9:1 cycloidal gearbox | 3D-printed 4:1 planetary gearbox with a hex shaft |
+| ![ACT Motor 17HM5417](docs/foto/motors_17hm5417.webp) | ![RB 17HD0004-6](docs/foto/motors_17hd0004.webp) | |
+| ACT Motor 17HM5417, 0.9°, 1.7 A | RB 17HD0004-6, lot 130403, left over from the printer days | |
 
 ```mermaid
 flowchart LR
