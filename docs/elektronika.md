@@ -173,6 +173,12 @@ Futabas pamatplate un RF plate netiek barotas. Futabas **pogu plate** (BU4051, 1
 potenciometrs, LED, pīkstulis) paliek un tiek pieslēgta caur tās savienotājiem **H1** un **H2**.
 Slēdži iet caur **CD74HC4067** (16 kanālu multipleksors), ekrāns — **ST7789 1.69" 240×280** (SPI).
 
+Shēmas (EasyEDA): [`futaba_shemas/`](../futaba_shemas/)
+- [ESP plate](../futaba_shemas/Schematic_esp-plate_2026-10-18.png) — ESP32-S3, barošana (LM2596, 2×18650),
+  HC4067 ar slēdžiem, ekrāns, savienotāji H2 (1×10) un H3 (1×9) uz Futabas pogu plati;
+- [Futabas pogu plate](../futaba_shemas/Schematic_futaba-Esp_2026-10-18.png) — BU4051, 12 trima pogas,
+  potenciometrs, LED, pīkstulis, savienotāji H1 (1×9) un H2 (1×10).
+
 Firmware: `firmware/rc_remote` → `pio run -e s3 -t upload --upload-port COMx`
 (ielādei USB ligzda **"COM"** ar CH343 čipu).
 
