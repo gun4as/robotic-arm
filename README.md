@@ -1,5 +1,7 @@
 # 🦾 Robot roka
 
+**Latviski** | [English](README.en.md)
+
 5 asu robotroka ar NEMA17 (17HM5417, 0.9°) motoriem un 9:1 cikloidālajiem reduktoriem.
 Vadība no **PC programmas** caur USB (kā Printrun), no **web pārlūka** (telefons/dators) vai no pārveidotas
 **Futaba RC pults** (ESP-NOW vai LoRa).
@@ -26,7 +28,7 @@ flowchart LR
 |---|---|---|
 | [firmware/controller](firmware/controller) | Kustību kontrolieris: soļu ģenerators, manuāla kustība, sinhronizētas kustības, limiti, TMC2209 UART | `pio run -e ramps14` / `-e skr14turbo` |
 | [pc_app](pc_app) | **PC programma**: vadība, konfigurācija, gala slēdži, programmas ([apraksts](docs/pc_programma.md)) | `pc_app\start.bat` |
-| [firmware/controller/sim](firmware/controller/sim) | Firmware uz datora: simulācija (120 pārbaudes) un **virtuālā roka** PC programmai | `pio run -e sim` / `-e virtual` |
+| [firmware/controller/sim](firmware/controller/sim) | Firmware uz datora: simulācija (205 pārbaudes) un **virtuālā roka** PC programmai | `pio run -e sim` / `-e virtual` |
 | [firmware/esp32_bridge](firmware/esp32_bridge) | Tilts uz rokas (ESP32 / ESP32-S3 / D1 mini): Wi-Fi + web lapa + pults uztvērējs | `-e espnow`, `-e s3_espnow`, `-e d1mini` … |
 | [firmware/rc_remote](firmware/rc_remote) | ESP32-S3 Futaba T8J pultī: stiki, pogas, slēdži (HC4067), krāsu ekrāns → ESP-NOW | `-e s3` |
 | [firmware/common](firmware/common) | Kopīgais radio pakešu formāts | — |
@@ -50,7 +52,8 @@ Viss tiek būvēts ar [PlatformIO](https://platformio.org/) (VS Code paplašinā
 - SKR: TMC2209 caur UART — mikrosoļi, strāva, SpreadCycle/StealthChop; periodiski pārbauda
   draiverus un tos pārkonfigurē, ja motoru barošana ieslēgta vēlāk.
 - Rindas no ESP32 ar kontrolsummu — bojāta rinda tiek noraidīta, nevis izpildīta kļūdaini.
-- **Gala slēdži un HOME** (ātrā + lēnā pieeja, secība, NO/NC), slēdzis kustības laikā → ESTOP.
+- **Gala slēdži un HOME** (ātrā + lēnā pieeja, secība, NO/NC); pēc HOME locītava aizbrauc uz **0 = vidus**.
+  Slēdzis kustības laikā → apstāšanās bez trauksmes, no slēdža var aizbraukt bez RESET.
 - Iestatījumi saglabājas **kontroliera atmiņā** (`SAVE`): Mega EEPROM / SKR flash.
 - **Ekrāns** (3D printera RepRapDiscount 20×4 + grozāmā poga): statuss, izvēlne, locītavu kustināšana,
   HOME/nulle, **programmas no SD kartes bez datora** ([apraksts](docs/ekrans.md)).
@@ -65,8 +68,10 @@ http://robotroka.local. Web lapā: manuāla kustība, mērķa pozīcijas, satvē
 (punktu programma, eksports/imports JSON), konfigurācija (SAVE kontrolierī), HOME, konsole.
 Pults ar prioritāti pār web manuālo kustību.
 
-**Pults**: 6 analogie kanāli + 4 slēdži, kalibrācija ar BOOT pogu, ARM slēdzis (pēc ieslēgšanas
-jāpārslēdz OFF→ON, lai roka nesāktu kustēties pati), ESTOP slēdzis, ESP-NOW kanāla automātiska meklēšana.
+**Pults** (Futaba T8J korpuss, ESP32-S3): 2 stiki + potenciometrs, 12 trima pogas, 5 divpozīciju un 2 trīspozīciju
+slēdži + spiedpoga H, krāsu ekrāns ar locītavu pozīcijām, ARM un ESTOP slēdži (neieslēdzas, ja slēdži nav
+sākuma pozīcijās), HOME/RESET no pults, stiku kalibrācija, firmware ielāde caur Wi-Fi (OTA), ESP-NOW kanāla
+automātiska meklēšana. Shēmas: [futaba_shemas](futaba_shemas).
 
 ## Ātrais starts
 
