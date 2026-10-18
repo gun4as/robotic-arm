@@ -64,6 +64,16 @@ flowchart LR
   PC -. "TCP :23 over the network" .-> BR
 ```
 
+## What it looks like
+
+| Web page (phone / PC) | PC application |
+|---|---|
+| ![Web page](docs/foto/web_lapa.png) | ![PC application](docs/foto/pc_programma.png) |
+
+<img src="docs/foto/pults_ekrans.webp" alt="Remote screen with joint positions" width="600">
+
+*The remote screen: link status, ARM, battery and the position of every joint with bars.*
+
 ## Repository layout
 
 | Folder | What it is | Build |

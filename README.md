@@ -60,6 +60,16 @@ flowchart LR
   CTRL --> ES[Gala slēdži]
 ```
 
+## Kā tas izskatās
+
+| Web lapa (telefons / dators) | PC programma |
+|---|---|
+| ![Web lapa](docs/foto/web_lapa.png) | ![PC programma](docs/foto/pc_programma.png) |
+
+<img src="docs/foto/pults_ekrans.webp" alt="Pults ekrāns ar locītavu pozīcijām" width="600">
+
+*Pults ekrānā: saite ar roku, ARM, baterija un visu locītavu pozīcijas ar joslām.*
+
 ## Kas ir mapē
 
 | Mape | Kas tas ir | Būve |
