@@ -1,0 +1,10 @@
+{
+  "autodeskProduct": "Fusion360",
+  "type": "script",
+  "author": "robot roka",
+  "description": {
+    "": "J1 karodziņš optiskajam gala slēdzim"
+  },
+  "supportedOS": "windows|mac",
+  "editEnabled": true
+}

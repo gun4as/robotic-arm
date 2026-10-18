@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Robot Roka</title>
+<style>
+:root {
+  --bg: #15181d; --panel: #1e232a; --panel2: #262c35; --line: #333b46;
+  --text: #e6e9ee; --dim: #8b95a3; --accent: #e0573a; --ok: #3fb67a;
+  --warn: #e3a72f; --bad: #e5484d; --blue: #4c8dff;
+  --r: 10px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text);
+  font: 15px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+body { padding: 0 0 40px; -webkit-tap-highlight-color: transparent; }
+header { position: sticky; top: 0; z-index: 5; background: rgba(21,24,29,.96);
+  border-bottom: 1px solid var(--line); padding: 10px 16px; display: flex; gap: 10px;
+  align-items: center; flex-wrap: wrap; }
+header h1 { font-size: 17px; margin: 0 8px 0 0; letter-spacing: .3px; }
+.badge { padding: 3px 9px; border-radius: 99px; font-size: 12px; font-weight: 600;
+  background: var(--panel2); color: var(--dim); white-space: nowrap; }
+.badge.ok { background: rgba(63,182,122,.18); color: var(--ok); }
+.badge.warn { background: rgba(227,167,47,.18); color: var(--warn); }
+.badge.bad { background: rgba(229,72,77,.2); color: var(--bad); }
+.badge.blue { background: rgba(76,141,255,.18); color: var(--blue); }
+.spacer { flex: 1; }
+main { max-width: 1100px; margin: 0 auto; padding: 14px 16px; display: grid; gap: 14px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; }
+.panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .8px; color: var(--dim);
+  margin: 0 0 12px; font-weight: 600; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+button { font: inherit; color: var(--text); background: var(--panel2); border: 1px solid var(--line);
+  border-radius: 8px; padding: 9px 14px; cursor: pointer; touch-action: manipulation; user-select: none; }
+button:hover { border-color: #4a5462; }
+button:active { transform: translateY(1px); }
+button.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+button.danger { background: var(--bad); border-color: var(--bad); color: #fff; font-weight: 700; }
+button.small { padding: 5px 10px; font-size: 13px; }
+button:disabled { opacity: .45; cursor: default; }
+#estop { font-size: 18px; padding: 14px 22px; letter-spacing: 1px; box-shadow: 0 0 0 3px rgba(229,72,77,.25); }
+input[type=number], input[type=text], input[type=password] { font: inherit; color: var(--text);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+label { color: var(--dim); font-size: 13px; }
+.grid2 { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media (min-width: 860px) { .grid2 { grid-template-columns: 1.4fr 1fr; } }
+
+.joint { display: grid; grid-template-columns: 44px 1fr auto; gap: 6px 10px; align-items: center;
+  padding: 10px 0; border-top: 1px solid var(--line); }
+.joint:first-of-type { border-top: 0; }
+.jname { font-weight: 700; font-size: 16px; }
+.jpos { font: 600 22px/1 ui-monospace, "SF Mono", Consolas, monospace; font-variant-numeric: tabular-nums; }
+.jpos small { font-size: 12px; color: var(--dim); font-weight: 400; margin-left: 6px; }
+.jog { display: flex; gap: 6px; }
+.jog button { width: 52px; height: 44px; font-size: 18px; padding: 0; }
+.jog button.held { background: var(--accent); border-color: var(--accent); }
+.jtarget { grid-column: 2 / 4; display: grid; grid-template-columns: 1fr 86px; gap: 8px; align-items: center; }
+.zchip { font-size: 11px; color: var(--warn); }
+/* apstiprinājuma logs lapā (nevis pārlūka confirm) */
+.dlg { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center;
+  padding: 16px; background: rgba(0,0,0,.55); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.dlg[hidden] { display: none; }
+.dlg-box { width: min(440px, 100%); background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+.dlg-head { padding: 14px 18px; font-weight: 700; border-bottom: 1px solid var(--line); }
+.dlg-body { padding: 18px; }
+.dlg-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 0 18px 16px; }
+button.danger { background: rgba(229,72,77,.15); border-color: rgba(229,72,77,.55); color: var(--bad); }
+button.danger:hover { background: rgba(229,72,77,.28); }
+/* stāvokļa josla: kur locītava ir starp min un max */
+.jbar { position: relative; height: 24px; background: var(--panel2); border: 1px solid var(--line);
+  border-radius: 6px; cursor: pointer; overflow: hidden; }
+.jbar .fill { position: absolute; top: 0; bottom: 0; background: var(--accent); opacity: .3; }
+.jbar .zero { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--dim); }
+.jbar .tgt { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--warn); }
+.jbar .pos { position: absolute; top: 3px; bottom: 3px; width: 6px; margin-left: -3px; border-radius: 3px;
+  background: var(--accent); }
+.jbar.nozero .pos, .jbar.nozero .fill { background: var(--dim); }
+.jbar .lim { position: absolute; top: 4px; font-size: 10px; color: var(--dim); pointer-events: none; }
+.zchip.ok { color: var(--ok); }
+
+.points { list-style: none; margin: 10px 0 0; padding: 0; max-height: 300px; overflow: auto; }
+.points li { display: flex; gap: 8px; align-items: center; padding: 6px 8px; border-radius: 8px;
+  font: 13px ui-monospace, Consolas, monospace; }
+.points li:nth-child(odd) { background: var(--panel2); }
+.points li.active { outline: 2px solid var(--accent); }
+.points li span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+/* cilne Pults */
+.rcgrid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media (min-width: 900px) { .rcgrid { grid-template-columns: 1fr 1.3fr; } }
+.rcbar { display: grid; grid-template-columns: 110px 1fr 48px; gap: 8px; align-items: center; font-size: 13px; margin: 4px 0; }
+.rcbar .trk { position: relative; height: 16px; background: var(--panel2); border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+.rcbar .trk i { position: absolute; top: 0; bottom: 0; background: var(--accent); opacity: .55; }
+.rcbar .trk b { position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: var(--dim); }
+.rcbar span:last-child { text-align: right; font-variant-numeric: tabular-nums; color: var(--dim); }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0; }
+.chip { min-width: 38px; text-align: center; padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; font-size: 12px; color: var(--dim); }
+.chip.on { background: var(--ok); border-color: var(--ok); color: #000; font-weight: 600; }
+table.rc { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.rc td, table.rc th { padding: 3px 4px; text-align: left; }
+table.rc th { color: var(--dim); font-weight: 500; }
+table.rc select, table.rc input[type=number] { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px; }
+table.rc tr.hot td:first-child { background: var(--ok); color: #000; border-radius: 4px; font-weight: 700; }
+.tabs button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+#log { height: 220px; overflow: auto; background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+  padding: 8px; font: 12px/1.45 ui-monospace, Consolas, monospace; white-space: pre-wrap; word-break: break-all; }
+#log .tx { color: var(--blue); } #log .err { color: var(--bad); } #log .sys { color: var(--warn); }
+table.cfg { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.cfg th { color: var(--dim); font-weight: 500; text-align: left; padding: 4px; }
+table.cfg td { padding: 3px; }
+table.cfg input[type=number], table.cfg select { padding: 6px; }
+table.cfg select { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; width: 100%; }
+#tabCfg { overflow-x: auto; }
+.hint { color: var(--dim); font-size: 12px; margin: 8px 0 0; }
+#toast { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); background: var(--panel2);
+  border: 1px solid var(--line); padding: 10px 16px; border-radius: 8px; opacity: 0; transition: opacity .2s;
+  pointer-events: none; max-width: calc(100% - 32px); }
+#toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🦾 Robot Roka</h1>
+  <span id="bWs" class="badge bad">nav savienojuma</span>
+  <span id="bBoard" class="badge blue" hidden></span>
+  <span id="bState" class="badge">—</span>
+  <span id="bEn" class="badge">motori —</span>
+  <span id="bRc" class="badge">pults —</span>
+  <span class="spacer"></span>
+  <button id="estop" class="danger" title="Avārijas apstāšanās (atstarpe)">STOP!</button>
+</header>
+
+<main>
+  <div class="panel row">
+    <button id="btnStop">Apturēt</button>
+    <button id="btnReset">Atiestatīt (RESET)</button>
+    <button id="btnEnable">Ieslēgt motorus</button>
+    <button id="btnDisable">Atslēgt motorus</button>
+    <button id="btnZeroAll">Nulle visām</button>
+    <button id="btnHome">HOME visām</button>
+    <span class="spacer"></span>
+    <label style="min-width:180px">Ātrums <b id="spdVal">50</b>%
+      <input id="spd" type="range" min="1" max="100" value="50"></label>
+  </div>
+
+  <div class="grid2">
+    <section class="panel">
+      <h2>Locītavas</h2>
+      <div id="joints"></div>
+      <div class="row" style="margin-top:10px">
+        <button id="btnGo" class="primary">Iet uz mērķiem</button>
+        <button id="btnTargetsFromPos">Mērķi = pašreizējā poz.</button>
+      </div>
+      <p class="hint">Bultiņas ◀ ▶: turi, un locītava brauc. Josla rāda, kur locītava ir (dzeltenā līnija = mērķis, klikšķis joslā to pārliek).
+        Skaitlis: <b>mērķa leņķis</b> — roka nekustas,
+        kamēr nenospied "Iet uz mērķiem". Pirms tam locītavai jāuzstāda nulle
+        (noliec roku sākuma pozā un spied "Nulle visām").</p>
+    </section>
+
+    <section class="panel">
+      <h2>Satvērējs</h2>
+      <div class="row"><label style="flex:1">Aizvērts <b id="gripVal">0</b>%
+        <input id="grip" type="range" min="0" max="100" value="0"></label></div>
+      <div class="row" style="margin-top:8px">
+        <button class="small" data-grip="0">Atvērt</button>
+        <button class="small" data-grip="50">50%</button>
+        <button class="small" data-grip="100">Aizvērt</button>
+      </div>
+
+      <h2 style="margin-top:18px">Programma (mācīšana)</h2>
+      <div class="row">
+        <button id="btnAddPt">+ Punkts</button>
+        <button id="btnPlay" class="primary">▶ Atskaņot</button>
+        <button id="btnPlayStop">■</button>
+        <label><input id="loop" type="checkbox"> atkārtot</label>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <label>Pauze punktā, ms <input id="ptWait" type="number" value="300" min="0" step="100" style="width:90px"></label>
+        <button class="small" id="btnExport">Eksportēt</button>
+        <button class="small" id="btnImport">Importēt</button>
+        <button class="small" id="btnClearPts">Notīrīt</button>
+        <input id="importFile" type="file" accept=".json" hidden>
+      </div>
+      <ul id="points" class="points"></ul>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="tabs">
+      <button data-tab="tabLog" class="on">Konsole</button>
+      <button data-tab="tabCfg">Konfigurācija</button>
+      <button data-tab="tabRc">Pults</button>
+      <button data-tab="tabWifi">Wi-Fi / info</button>
+    </div>
+
+    <div id="tabLog">
+      <div id="log"></div>
+      <form id="cmdForm" class="row" style="margin-top:8px">
+        <input id="cmd" type="text" placeholder="komanda, piem. MOVE 10 20 0 0 0 S30  vai  HELP" autocomplete="off" style="flex:1">
+        <button class="primary">Sūtīt</button>
+        <label><input id="showStatus" type="checkbox"> rādīt statusu</label>
+      </form>
+    </div>
+
+    <div id="tabCfg" hidden>
+      <table class="cfg">
+        <thead><tr><th></th><th>motora soļi</th><th>mikrosoļi</th><th>reduktors</th><th>min °</th><th>max °</th><th>ātrums °/s</th><th>paātr. °/s²</th><th>invert</th><th>strāva mA</th></tr></thead>
+        <tbody id="cfgBody"></tbody>
+      </table>
+      <div class="row" style="margin-top:10px">
+        <label><input id="hwLcd" type="checkbox"> Ekrāns (LCD + poga) pieslēgts</label>
+        <label><input id="hwSd" type="checkbox"> SD karte ekrānā</label>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button id="btnCfgRead">Nolasīt no kontroliera</button>
+        <button id="btnCfgApply" class="primary">Pielietot un saglabāt</button>
+        <button id="btnCfgClear">Rūpnīcas iestatījumi</button>
+        <button id="btnTmc">TMC diagnostika</button>
+      </div>
+      <p class="hint">Vērtības saglabājas kontroliera atmiņā (SAVE). Gala slēdžus un HOME ērtāk iestatīt PC programmā.
+        Strāva darbojas tikai ar SKR V1.4 Turbo + TMC2209 UART. RAMPS mikrosoļiem jāsakrīt ar jumperiem.</p>
+    </div>
+
+    <div id="tabRc" hidden>
+      <div class="rcgrid">
+        <div>
+          <h3 style="margin:0 0 6px">Tiešraidē <small id="rcState" style="color:var(--dim);font-weight:400"></small></h3>
+          <div id="rcBars"></div>
+          <div style="font-size:13px;color:var(--dim);margin-top:8px">Pogas (nospiežot iedegas)</div>
+          <div class="chips" id="rcBtns"></div>
+          <div style="font-size:13px;color:var(--dim)">Slēdži</div>
+          <div class="chips" id="rcSw"></div>
+          <p class="hint">Nospied pults trima pogu - tabulā iezīmēsies tās rinda. Tā var atrast, kura fiziskā poga ir kurš numurs.</p>
+        </div>
+        <div>
+          <h3 style="margin:0 0 6px">Trima pogas</h3>
+          <table class="rc"><thead><tr><th>poga</th><th>ko dara</th><th>virziens</th></tr></thead><tbody id="rcTrim"></tbody></table>
+          <p class="hint">Turot pogu H (Shift): trims "+" = nulle šai locītavai, "−" = HOME šai locītavai.
+            Tikai H 2 s = HOME visām.</p>
+          <h3 style="margin:14px 0 6px">Stiki</h3>
+          <table class="rc"><thead><tr><th></th><th>A izslēgts</th><th></th><th>A ieslēgts</th><th></th></tr></thead><tbody id="rcStick"></tbody></table>
+          <h3 style="margin:14px 0 6px">Ātrums un soļi</h3>
+          <table class="rc"><tbody>
+            <tr><td>Ātrums (slēdzis E), %</td><td><input type="number" id="rcS0" min="1" max="100" style="width:64px">
+              <input type="number" id="rcS1" min="1" max="100" style="width:64px"> <input type="number" id="rcS2" min="1" max="100" style="width:64px"></td></tr>
+            <tr><td>Trima solis, °</td><td><input type="number" id="rcStep" min="0.1" max="20" step="0.1" style="width:80px"></td></tr>
+            <tr><td>Satvērēja pogu solis, %</td><td><input type="number" id="rcGrip" min="1" max="50" style="width:80px"></td></tr>
+          </tbody></table>
+          <div class="row" style="margin-top:10px">
+            <button id="btnRcSave" class="primary">Saglabāt</button>
+            <button id="btnRcDef">Noklusējumi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tabWifi" hidden>
+      <pre id="info" style="white-space:pre-wrap;color:var(--dim);margin:0 0 12px"></pre>
+      <div class="row">
+        <input id="ssid" type="text" placeholder="mājas Wi-Fi nosaukums (tukšs = tikai AP)" style="flex:1;min-width:200px">
+        <input id="pass" type="password" placeholder="parole" style="flex:1;min-width:160px">
+        <button id="btnWifi">Saglabāt un restartēt</button>
+      </div>
+      <p class="hint">Tilta piekļuves punkts "RobotRoka" vienmēr paliek pieejams: http://192.168.4.1.<br>
+        Kad tilts pieslēgts mājas tīklam: web lapa http://robotroka.local (vai "sta" adrese augšā),<br>
+        PC programmai izvēlies "Tilts tīklā" vai ieraksti adresi no rindas "pc=". Pults turpina strādāt.</p>
+    </div>
+  </section>
+</main>
+<div id="toast"></div>
+<div id="dlg" class="dlg" hidden>
+  <div class="dlg-box" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+    <div class="dlg-head" id="dlgTitle"></div>
+    <div class="dlg-body" id="dlgMsg"></div>
+    <div class="dlg-foot"><button id="dlgOk" class="danger">Apstiprināt</button><button id="dlgNo">Atcelt</button></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const N = 5;
+const $ = (s) => document.querySelector(s);
+const ERR = {
+  not_zeroed: 'Locītavai nav uzstādīta nulle (ZERO)', limit: 'Mērķis ārpus limita',
+  queue_full: 'Kustību rinda pilna', alarm: 'Avārijas stāvoklis — spied RESET',
+  busy: 'Aizņemts — vispirms apturi kustību', bad_arg: 'Nepareizi argumenti',
+  unknown_cmd: 'Nezināma komanda', no_tmc: 'Šai platei nav TMC UART', tmc: 'TMC draiveris neatbild',
+  line_too_long: 'Rinda par garu', no_endstop: 'Locītavai nav ieslēgts gala slēdzis', storage: 'Atmiņas kļūda', checksum: 'Bojāta rinda UART līnijā (troksnis?) — komanda noraidīta'
+};
+
+let ws = null, wsOk = false;
+const st = { state: '—', pos: Array(N).fill(0), en: false, zero: Array(N).fill(false), es: '-----', q: 0, grip: 0, at: 0 };
+const cfg = Array.from({ length: N }, (_, i) => ({ name: 'J' + (i + 1), motor_steps: 400, microsteps: 16, gear: 9, min: -180, max: 180, speed: 30, accel: 60, invert: 0, current: 0 }));
+let targets = Array(N).fill(0);
+let lastErr = null;
+
+// ------------------------------------------------------------------ savienojums
+function connect() {
+  const host = location.hostname || '192.168.4.1';
+  ws = new WebSocket(`ws://${host}:81/`);
+  ws.onopen = () => { wsOk = true; badge('bWs', 'savienots', 'ok'); send('INFO', true); send('CFG'); send('#info'); };
+  ws.onclose = () => { wsOk = false; badge('bWs', 'nav savienojuma', 'bad'); setTimeout(connect, 2000); };
+  ws.onerror = () => ws.close();
+  ws.onmessage = (e) => onLine(String(e.data));
+}
+function send(line, quiet) {
+  if (!wsOk) { toast('Nav savienojuma ar robotu'); return false; }
+  ws.send(line);
+  if (!quiet) log(line, 'tx');
+  return true;
+}
+
+function onLine(l) {
+  if (l[0] === '<') { parseStatus(l); if ($('#showStatus').checked) log(l); return; }
+  if (l.startsWith('#rc ')) { parseRc(l); return; }
+  if (l.startsWith('#rcraw')) { rcRaw(l); return; }
+  if (l.startsWith('#rcmap ')) { rcMapShow(l); return; }
+  if (l === '#ok rcmap') { toast('Pults iestatījumi saglabāti'); return; }
+  if (l === '#err rcmap') { toast('Nederīgi pults iestatījumi'); return; }
+  if (l.startsWith('#info')) { $('#info').textContent = l.slice(6).split(' ').join('\n'); }
+  if (l === '#rc_priority') { toast('Pults pašlaik vada roku'); return; }
+  if (l.startsWith('[INFO]')) {
+    const m = /board=(.*?) joints=/.exec(l), v = /^\[INFO\] \S+ (\S+)/.exec(l);
+    if (m) { const b = document.getElementById('bBoard'); b.textContent = m[1] + (v ? ' · fw ' + v[1] : ''); b.hidden = false; }
+  }
+  if (l.startsWith('[CFG] J')) parseCfgLine(l);
+  else if (l.startsWith('[CFG] grip_open')) parseHw(l);
+  if (l.startsWith('[CFG] end')) { renderCfg(); renderJoints(true); }
+  if (l.startsWith('err ')) {
+    const code = l.slice(4).trim();
+    lastErr = code;
+    toast(ERR[code] || l);
+    log(l, 'err');
+    return;
+  }
+  if (l === 'ok') { if ($('#showStatus').checked) log(l); return; }
+  if (l.startsWith('[ESTOP]')) toast('AVĀRIJAS APSTĀŠANĀS');
+  if (l.startsWith('[ENDSTOP]')) { playing = false; toast(l.slice(10, 12) + ' apstājās pie gala slēdža - uz otru pusi var braukt'); }
+  if (l.startsWith('[HOME]')) toast(l);
+  if (l.startsWith('[ZERO]')) toast('Šī vieta tagad ir 0 - HOME turpmāk brauks šeit (saglabāts)');
+  if (l.startsWith('[JOG] ')) { const c = l.slice(6).trim(); toast(ERR[c] || l); return; }
+  log(l, l[0] === '#' || l[0] === '[' ? 'sys' : '');
+}
+
+function parseStatus(l) {
+  const parts = l.slice(1, -1).split('|');
+  st.state = parts[0];
+  for (const p of parts.slice(1)) {
+    const [k, v] = [p.slice(0, p.indexOf(':')), p.slice(p.indexOf(':') + 1)];
+    if (k === 'P') st.pos = v.split(',').map(Number);
+    else if (k === 'E') st.en = v === '1';
+    else if (k === 'Z') st.zero = v.split('').map((c) => c === '1');
+    else if (k === 'S') st.es = v;
+    else if (k === 'Q') st.q = +v;
+    else if (k === 'G') st.grip = +v;
+  }
+  st.at = performance.now();
+  if (document.activeElement !== $('#grip') && !gripT) { $('#grip').value = st.grip; $('#gripVal').textContent = st.grip; }
+  const cls = { Idle: 'ok', Jog: 'blue', Move: 'blue', Home: 'blue', Alarm: 'bad' }[st.state] || '';
+  const names = { Idle: 'gatavs', Jog: 'manuāli', Move: 'kustība', Home: 'HOME', Alarm: 'AVĀRIJA' };
+  badge('bState', (names[st.state] || st.state) + (st.q ? ` · rindā ${st.q}` : ''), cls);
+  badge('bEn', st.en ? 'motori ieslēgti' : 'motori atslēgti', st.en ? 'ok' : 'warn');
+  for (let i = 0; i < N; i++) {
+    const el = document.getElementById('pos' + i);
+    if (el) el.firstChild.nodeValue = st.pos[i].toFixed(2) + '°';
+    const bp = document.getElementById('bp' + i), bf = document.getElementById('bf' + i);
+    if (bp) {
+      const p = barPct(i, st.pos[i]), z = barPct(i, 0);
+      bp.style.left = p + '%';
+      bf.style.left = Math.min(p, z) + '%'; bf.style.width = Math.abs(p - z) + '%';
+      document.getElementById('bar' + i).classList.toggle('nozero', !st.zero[i]);
+    }
+    const z = document.getElementById('z' + i);
+    if (z) { z.textContent = (st.zero[i] ? 'nulle ✓' : 'nav nulles') + (st.es[i] === '1' ? ' · SLĒDZIS' : ''); z.className = 'zchip' + (st.zero[i] && st.es[i] !== '1' ? ' ok' : ''); }
+  }
+}
+
+function parseRc(l) {
+  const kv = Object.fromEntries(l.slice(4).split(' ').map((s) => s.split('=')));
+  if (kv.link !== '1') { badge('bRc', `pults (${kv.type}) —`, ''); return; }
+  if (kv.estop === '1') { badge('bRc', 'pults: E-STOP', 'bad'); return; }
+  badge('bRc', kv.armed === '1' ? `pults vada · ${kv.bank} · ${kv.speed}%` : 'pults gatava', kv.armed === '1' ? 'blue' : 'ok');
+}
+
+const hw = { lcd: 0, sd: 0 };
+function parseHw(l) {
+  for (const kv of l.slice(6).split(' ')) { const [k, v] = kv.split('='); if (k in hw) hw[k] = +v; }
+  $('#hwLcd').checked = !!hw.lcd; $('#hwSd').checked = !!hw.sd;
+}
+
+function parseCfgLine(l) {
+  const m = /^\[CFG\] J(\d+) (.*)$/.exec(l);
+  if (!m) return;
+  const j = +m[1] - 1;
+  for (const kv of m[2].split(' ')) {
+    const [k, v] = kv.split('=');
+    if (k === 'name') cfg[j].name = v; else cfg[j][k] = Number(v);
+  }
+}
+
+// ------------------------------------------------------------------ UI: locītavas
+function barPct(i, v) {
+  const c = cfg[i], span = c.max - c.min;
+  return span > 0 ? (Math.min(c.max, Math.max(c.min, v)) - c.min) / span * 100 : 50;
+}
+function renderJoints(keepTargets) {
+  const box = $('#joints');
+  box.innerHTML = '';
+  for (let i = 0; i < N; i++) {
+    const c = cfg[i];
+    if (!keepTargets) targets[i] = 0;
+    targets[i] = Math.min(c.max, Math.max(c.min, targets[i]));
+    const d = document.createElement('div');
+    d.className = 'joint';
+    d.innerHTML = `
+      <div class="jname">${c.name}</div>
+      <div><div class="jpos" id="pos${i}">0.00°<small>${c.min}…${c.max}</small></div>
+        <span class="zchip" id="z${i}">nav nulles</span>
+        <button class="small" data-zero="${i}" style="margin-left:6px">nulle</button></div>
+      <div class="jog"><button data-jog="${i}" data-dir="-1">◀</button><button data-jog="${i}" data-dir="1">▶</button></div>
+      <div class="jtarget">
+        <div class="jbar nozero" id="bar${i}" title="Kur locītava atrodas. Dzeltenā līnija = mērķis (klikšķis joslā to pārliek), pelēkā = 0°">
+          <span class="lim" style="left:5px">${c.min}°</span><span class="lim" style="right:5px">${c.max}°</span>
+          <div class="fill" id="bf${i}"></div><div class="zero" style="left:${barPct(i, 0)}%"></div>
+          <div class="tgt" id="bt${i}" style="left:${barPct(i, targets[i])}%"></div>
+          <div class="pos" id="bp${i}" style="left:${barPct(i, 0)}%"></div>
+        </div>
+        <input type="number" id="tn${i}" min="${c.min}" max="${c.max}" step="0.5" value="${targets[i]}" title="Mērķa leņķis, °"></div>`;
+    box.appendChild(d);
+    const tn = d.querySelector('#tn' + i), bar = d.querySelector('#bar' + i), bt = d.querySelector('#bt' + i);
+    const setTarget = (v) => {
+      targets[i] = Math.min(c.max, Math.max(c.min, Math.round(v * 2) / 2));
+      tn.value = targets[i]; bt.style.left = barPct(i, targets[i]) + '%';
+    };
+    tn.onchange = () => setTarget(+tn.value);
+    bar.onclick = (e) => { const r = bar.getBoundingClientRect(); setTarget(c.min + (e.clientX - r.left) / r.width * (c.max - c.min)); };
+  }
+  box.querySelectorAll('[data-jog]').forEach(bindJog);
+  box.querySelectorAll('[data-zero]').forEach((b) => b.onclick = () => send('ZERO ' + (+b.dataset.zero + 1)));
+}
+
+// Jogs: kamēr poga nospiesta, sūtām JOG ik 100 ms (kontroliera sargsuns 300 ms)
+let jogTimer = null, jogVec = null;
+function bindJog(btn) {
+  const j = +btn.dataset.jog, dir = +btn.dataset.dir;
+  const start = (e) => {
+    e.preventDefault();
+    try { btn.setPointerCapture(e.pointerId); } catch (err) { /* nav kritiski */ }
+    stopJog();
+    jogVec = Array(N).fill(0);
+    jogVec[j] = dir * +$('#spd').value;
+    btn.classList.add('held');
+    const tick = () => send('JOG ' + jogVec.join(' '), true);
+    tick();
+    jogTimer = setInterval(tick, 100);
+  };
+  const end = () => { if (btn.classList.contains('held')) { btn.classList.remove('held'); stopJog(); } };
+  btn.addEventListener('pointerdown', start);
+  btn.addEventListener('pointerup', end);
+  btn.addEventListener('pointercancel', end);
+  btn.addEventListener('lostpointercapture', end);
+  btn.addEventListener('contextmenu', (e) => e.preventDefault());
+}
+function stopJog() {
+  if (jogTimer) { clearInterval(jogTimer); jogTimer = null; send('JOG 0 0 0 0 0', true); }
+  jogVec = null;
+}
+window.addEventListener('blur', stopJog);
+document.addEventListener('visibilitychange', () => { if (document.hidden) stopJog(); });
+
+function moveCmd(vals, speed) { return 'MOVE ' + vals.map((v) => (v === null ? '_' : (+v).toFixed(2))).join(' ') + ' S' + speed; }
+
+// ------------------------------------------------------------------ programma
+let points = [];
+try { points = JSON.parse(localStorage.getItem('rr_points') || '[]'); } catch (e) { points = []; }
+let playing = false;
+const savePts = () => { try { localStorage.setItem('rr_points', JSON.stringify(points)); } catch (e) {} };
+
+function renderPoints(active = -1) {
+  const ul = $('#points');
+  ul.innerHTML = '';
+  points.forEach((p, i) => {
+    const li = document.createElement('li');
+    if (i === active) li.className = 'active';
+    li.innerHTML = `<b>${i + 1}</b><span>${p.pos.map((v) => (v === null ? '—' : v.toFixed(1))).join(' ')} · G${p.grip} · S${p.speed}</span>
+      <button class="small" data-go="${i}">iet</button><button class="small" data-up="${i}">↑</button>
+      <button class="small" data-del="${i}">✕</button>`;
+    ul.appendChild(li);
+  });
+  ul.querySelectorAll('[data-go]').forEach((b) => b.onclick = () => {
+    const p = points[+b.dataset.go]; send(moveCmd(p.pos, p.speed)); send('GRIP ' + p.grip);
+  });
+  ul.querySelectorAll('[data-up]').forEach((b) => b.onclick = () => {
+    const i = +b.dataset.up; if (i > 0) { [points[i - 1], points[i]] = [points[i], points[i - 1]]; savePts(); renderPoints(); }
+  });
+  ul.querySelectorAll('[data-del]').forEach((b) => b.onclick = () => { points.splice(+b.dataset.del, 1); savePts(); renderPoints(); });
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+async function waitDone(timeoutMs = 120000) {
+  const t0 = performance.now();
+  // vispirms gaidām, kad kontrolieris komandu pieņem (stāvoklis mainās), tad - kad beidz
+  while (performance.now() - t0 < 600 && st.state === 'Idle' && st.q === 0 && !lastErr) await sleep(20);
+  while (playing && performance.now() - t0 < timeoutMs) {
+    if (lastErr) return false;
+    if (st.state === 'Alarm') return false;
+    if (st.state === 'Idle' && st.q === 0 && performance.now() - st.at < 400) return true;
+    await sleep(30);
+  }
+  return false;
+}
+
+async function play() {
+  if (playing || !points.length) return;
+  playing = true;
+  $('#btnPlay').disabled = true;
+  try {
+    do {
+      for (let i = 0; i < points.length && playing; i++) {
+        renderPoints(i);
+        const p = points[i];
+        lastErr = null;
+        if (!send(moveCmd(p.pos, p.speed))) { playing = false; break; }
+        if (!(await waitDone())) { if (playing) toast('Programma apturēta: ' + (ERR[lastErr] || lastErr || st.state)); playing = false; break; }
+        send('GRIP ' + p.grip);
+        await sleep(p.wait ?? +$('#ptWait').value);
+      }
+    } while (playing && $('#loop').checked);
+  } finally {
+    playing = false;
+    $('#btnPlay').disabled = false;
+    renderPoints();
+  }
+}
+
+// ------------------------------------------------------------------ konfigurācija
+function renderCfg() {
+  const tb = $('#cfgBody');
+  tb.innerHTML = '';
+  cfg.forEach((c, i) => {
+    const tr = document.createElement('tr');
+    const ms = [1, 2, 4, 8, 16, 32, 64, 128, 256].map((v) => `<option value="${v}"${v === +c.microsteps ? ' selected' : ''}>1/${v}</option>`).join('');
+    tr.innerHTML = `<td><b>${c.name}</b></td>
+      <td><input type="number" step="1" min="1" max="2000" data-k="motor_steps" data-j="${i}" value="${c.motor_steps}" title="200 = 1.8° motors, 400 = 0.9° motors"></td>
+      <td><select data-k="microsteps" data-j="${i}" title="RAMPS: jāsakrīt ar jumperiem">${ms}</select></td>
+      <td><input type="number" step="0.001" min="0.01" data-k="gear" data-j="${i}" value="${c.gear}"></td>
+      <td><input type="number" step="1" data-k="min" data-j="${i}" value="${c.min}"></td>
+      <td><input type="number" step="1" data-k="max" data-j="${i}" value="${c.max}"></td>
+      <td><input type="number" step="1" min="1" data-k="speed" data-j="${i}" value="${c.speed}"></td>
+      <td><input type="number" step="1" min="1" data-k="accel" data-j="${i}" value="${c.accel}"></td>
+      <td><input type="checkbox" data-k="invert" data-j="${i}" ${c.invert ? 'checked' : ''}></td>
+      <td><input type="number" step="50" min="0" max="2000" data-k="current" data-j="${i}" value="${c.current}"></td>`;
+    tb.appendChild(tr);
+  });
+}
+function applyCfg() {
+  const lines = [];
+  $('#cfgBody').querySelectorAll('input, select').forEach((el) => {
+    const j = +el.dataset.j, k = el.dataset.k;
+    const v = el.type === 'checkbox' ? (el.checked ? 1 : 0) : +el.value;
+    if (k === 'current' && !v) return;
+    lines.push(`CFG ${k.toUpperCase()} ${j + 1} ${v}`);
+  });
+  // ja diapazons pārbīdās uz augšu, MAX jāsūta pirms MIN (kontrolieris prasa min < max)
+  // piedziņa (soļi/°) vispirms; ja diapazons pārbīdās uz augšu, MAX pirms MIN (kontrolieris prasa min < max)
+  const prio = (l) => (/^CFG (MOTOR_STEPS|MICROSTEPS|GEAR) /.test(l) ? 0 : l.startsWith('CFG MAX') ? 1 : 2);
+  lines.sort((a, b) => prio(a) - prio(b));
+  if (+$('#hwLcd').checked !== hw.lcd) lines.push('CFG LCD ' + (+$('#hwLcd').checked));
+  if (+$('#hwSd').checked !== hw.sd) lines.push('CFG SD ' + (+$('#hwSd').checked));
+  lines.forEach((l) => send(l));
+  send('SAVE');
+  setTimeout(() => send('CFG'), 300);
+}
+
+// ------------------------------------------------------------------ palīgi
+function badge(id, text, cls) { const b = document.getElementById(id); b.textContent = text; b.className = 'badge ' + (cls || ''); }
+let toastT = null;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3000); }
+function log(text, cls) {
+  const box = $('#log');
+  const d = document.createElement('div');
+  if (cls) d.className = cls;
+  d.textContent = (cls === 'tx' ? '› ' : '') + text;
+  box.appendChild(d);
+  while (box.childNodes.length > 400) box.removeChild(box.firstChild);
+  box.scrollTop = box.scrollHeight;
+}
+
+// ------------------------------------------------------------------ cilne "Pults"
+const RC_CH = ['labais ↔', 'labais ↕', 'kreisais ↕', 'kreisais ↔', 'potenciometrs'];
+const RC_TRIM_TO = ['—', 'J1', 'J2', 'J3', 'J4', 'J5', 'satvērējs'];
+let rcTimer = null, rcBuilt = false;
+
+function rcWatch(on) {
+  clearInterval(rcTimer);
+  rcTimer = null;
+  if (!on) return;
+  if (!rcBuilt) rcBuild();
+  send('#rcmap', true);
+  send('#rcwatch', true);
+  rcTimer = setInterval(() => send('#rcwatch', true), 2000);
+}
+
+function opt(list, values, sel) {
+  return list.map((t, i) => `<option value="${values[i]}"${values[i] == sel ? ' selected' : ''}>${t}</option>`).join('');
+}
+
+function rcBuild() {
+  rcBuilt = true;
+  $('#rcBars').innerHTML = RC_CH.map((n, i) =>
+    `<div class="rcbar"><span>${n}</span><div class="trk"><b></b><i id="rcb${i}"></i></div><span id="rcv${i}">—</span></div>`).join('');
+  $('#rcBtns').innerHTML = Array.from({ length: 13 }, (_, i) =>
+    `<span class="chip" id="rcp${i}">${i === 12 ? 'H (Shift)' : 'P' + i}</span>`).join('');
+  $('#rcSw').innerHTML = ['G ARM', 'F avārija', 'A J4/J5', 'B', 'D'].map((n, i) =>
+    `<span class="chip" id="rcs${i}">${n}</span>`).join('') +
+    '<span class="chip" id="rcA">E ātrums —</span><span class="chip" id="rcB">C režīms —</span>';
+  $('#rcTrim').innerHTML = Array.from({ length: 12 }, (_, i) =>
+    `<tr id="rct${i}"><td>P${i}</td><td><select id="rctj${i}">${opt(RC_TRIM_TO, [0, 1, 2, 3, 4, 5, 6], 0)}</select></td>
+     <td><select id="rctd${i}">${opt(['−', '+'], [-1, 1], 1)}</select></td></tr>`).join('');
+  const chOpts = (id) => `<select id="${id}">${opt(['—'].concat(RC_CH), [-1, 0, 1, 2, 3, 4], -1)}</select>`;
+  $('#rcStick').innerHTML = Array.from({ length: 5 }, (_, j) =>
+    `<tr><td>J${j + 1}</td><td>${chOpts('rca' + j)}</td><td><label><input type="checkbox" id="rcai${j}"> apgriezt</label></td>
+     <td>${chOpts('rcb_' + j)}</td><td><label><input type="checkbox" id="rcbi${j}"> apgriezt</label></td></tr>`).join('');
+}
+
+function rcRaw(l) {
+  if (!rcBuilt) return;
+  const kv = Object.fromEntries(l.slice(7).split(' ').map((x) => x.split('=')));
+  if (kv.link !== '1') { $('#rcState').textContent = '· pults nav savienota'; return; }
+  $('#rcState').textContent = `· savienota · ${(kv.bat / 1000).toFixed(1)} V${kv.armed === '1' ? ' · ARM' : ''}`;
+  const ch = kv.ch.split(',').map(Number);
+  ch.forEach((v, i) => {
+    const bar = $('#rcb' + i), pot = i === 4;
+    const a = pot ? 0 : 50, b = pot ? (v + 1000) / 20 : 50 + v / 20;
+    bar.style.left = Math.min(a, b) + '%'; bar.style.width = Math.abs(b - a) + '%';
+    $('#rcv' + i).textContent = v;
+  });
+  const btn = +kv.btn, sw = +kv.sw, s3 = kv.s3.split(',').map(Number);
+  for (let i = 0; i < 13; i++) {
+    const on = !!(btn & (1 << i));
+    $('#rcp' + i).classList.toggle('on', on);
+    if (i < 12) $('#rct' + i).classList.toggle('hot', on);
+  }
+  for (let i = 0; i < 5; i++) $('#rcs' + i).classList.toggle('on', !!(sw & (1 << i)));
+  $('#rcA').textContent = 'E ātrums ' + ['lēni', 'vidēji', 'ātri'][s3[0]];
+  $('#rcB').textContent = 'C režīms ' + ['vadība', 'mācīšana', 'atskaņošana'][s3[1]];
+}
+
+function rcMapShow(l) {
+  if (!rcBuilt) rcBuild();
+  const kv = Object.fromEntries(l.slice(7).split(' ').map((x) => x.split('=')));
+  const pairs = (v) => v.split(',').map((p) => p.split(':').map(Number));
+  pairs(kv.t).forEach(([j, d], i) => { $('#rctj' + i).value = j; $('#rctd' + i).value = d < 0 ? -1 : 1; });
+  pairs(kv.a).forEach(([c, d], j) => { $('#rca' + j).value = c; $('#rcai' + j).checked = d < 0; });
+  pairs(kv.b).forEach(([c, d], j) => { $('#rcb_' + j).value = c; $('#rcbi' + j).checked = d < 0; });
+  const sp = kv.s.split(',');
+  $('#rcS0').value = sp[0]; $('#rcS1').value = sp[1]; $('#rcS2').value = sp[2];
+  $('#rcStep').value = (kv.st / 10).toFixed(1);
+  $('#rcGrip').value = kv.g;
+}
+
+function rcMapLine() {
+  const t = Array.from({ length: 12 }, (_, i) => `${$('#rctj' + i).value}:${$('#rctd' + i).value}`).join(',');
+  const bank = (p, ip) => Array.from({ length: 5 }, (_, j) => `${$('#' + p + j).value}:${$('#' + ip + j).checked ? -1 : 1}`).join(',');
+  return `#rcmap_set t=${t} a=${bank('rca', 'rcai')} b=${bank('rcb_', 'rcbi')}` +
+    ` s=${+$('#rcS0').value},${+$('#rcS1').value},${+$('#rcS2').value}` +
+    ` st=${Math.round(+$('#rcStep').value * 10)} g=${+$('#rcGrip').value}`;
+}
+
+// ------------------------------------------------------------------ apstiprinājums
+// Logs lapā: Enter = apstiprināt, Esc / klikšķis ārpusē = atcelt. Atstarpe joprojām = AVĀRIJAS STOP.
+let dlgDone = null;
+function ask(title, msg, okText = 'Apstiprināt') {
+  if (dlgDone) dlgDone(false);
+  return new Promise((resolve) => {
+    const d = $('#dlg');
+    $('#dlgTitle').textContent = title;
+    $('#dlgMsg').textContent = msg;
+    $('#dlgOk').textContent = okText;
+    const key = (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); done(false); }
+      else if (e.key === 'Enter') { e.preventDefault(); done(true); }
+    };
+    const done = (v) => { d.hidden = true; document.removeEventListener('keydown', key); dlgDone = null; resolve(v); };
+    dlgDone = done;
+    $('#dlgOk').onclick = () => done(true);
+    $('#dlgNo').onclick = () => done(false);
+    d.onclick = (e) => { if (e.target === d) done(false); };
+    document.addEventListener('keydown', key);
+    d.hidden = false;
+    $('#dlgNo').focus();
+  });
+}
+
+// ------------------------------------------------------------------ notikumi
+$('#estop').onclick = () => { playing = false; stopJog(); send('!'); };
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+    e.preventDefault();
+    if (dlgDone) dlgDone(false);
+    $('#estop').click();
+  }
+});
+$('#btnStop').onclick = () => { playing = false; stopJog(); send('STOP'); };
+$('#btnReset').onclick = () => send('RESET');
+$('#btnEnable').onclick = () => send('ENABLE');
+$('#btnDisable').onclick = async () => { if (await ask('Atslēgt motorus', 'Roka var nokrist no sava svara.', 'Atslēgt')) send('DISABLE'); };
+$('#btnHome').onclick = () => send('HOME');
+$('#btnZeroAll').onclick = async () => { if (await ask('Nulle visām', 'Pašreizējā pozīcija kļūs par 0° visām locītavām.', 'Uzstādīt')) send('ZERO'); };
+$('#spd').oninput = () => $('#spdVal').textContent = $('#spd').value;
+$('#btnGo').onclick = () => {
+  // locītavas bez nulles neaiztiek (kontrolieris tās atteiktos kustināt)
+  const vals = targets.map((v, i) => (st.zero[i] ? v : null));
+  if (vals.every((v) => v === null)) { toast('Nevienai locītavai nav nulles - vispirms nulle vai HOME'); return; }
+  const skip = vals.map((v, i) => (v === null ? 'J' + (i + 1) : '')).filter(Boolean);
+  if (skip.length) toast(skip.join(', ') + ' bez nulles - netiek kustinātas');
+  send(moveCmd(vals, +$('#spd').value));
+};
+$('#btnTargetsFromPos').onclick = () => { targets = st.pos.slice(); renderJoints(true); };
+
+let gripT = null;
+$('#grip').oninput = () => {
+  $('#gripVal').textContent = $('#grip').value;
+  clearTimeout(gripT);
+  gripT = setTimeout(() => { gripT = null; send('GRIP ' + $('#grip').value, true); }, 60);
+};
+document.querySelectorAll('[data-grip]').forEach((b) => b.onclick = () => {
+  $('#grip').value = b.dataset.grip; $('#gripVal').textContent = b.dataset.grip; send('GRIP ' + b.dataset.grip);
+});
+
+$('#btnAddPt').onclick = () => {
+  if (!st.zero.some(Boolean)) { toast('Nevienai locītavai nav nulles - vispirms nulle vai HOME'); return; }
+  points.push({ pos: st.pos.map((v, i) => (st.zero[i] ? v : null)), grip: st.grip, speed: +$('#spd').value });
+  savePts(); renderPoints();
+};
+$('#btnPlay').onclick = play;
+$('#btnPlayStop').onclick = () => { if (playing) { playing = false; send('STOP'); } };
+$('#btnClearPts').onclick = async () => { if (await ask('Notīrīt programmu', 'Dzēst visus ierakstītos punktus?', 'Dzēst')) { points = []; savePts(); renderPoints(); } };
+$('#btnExport').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(points, null, 1)], { type: 'application/json' }));
+  a.download = 'robotroka-programma.json';
+  a.click();
+};
+$('#btnImport').onclick = () => $('#importFile').click();
+$('#importFile').onchange = async (e) => {
+  try {
+    const data = JSON.parse(await e.target.files[0].text());
+    if (!Array.isArray(data)) throw new Error();
+    points = data; savePts(); renderPoints(); toast(`Ielādēti ${points.length} punkti`);
+  } catch (err) { toast('Nederīgs fails'); }
+  e.target.value = '';
+};
+
+document.querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => {
+  document.querySelectorAll('[data-tab]').forEach((x) => { x.classList.toggle('on', x === b); document.getElementById(x.dataset.tab).hidden = x !== b; });
+  if (b.dataset.tab === 'tabWifi') send('#info', true);
+  rcWatch(b.dataset.tab === 'tabRc');
+});
+$('#cmdForm').onsubmit = (e) => { e.preventDefault(); const v = $('#cmd').value.trim(); if (v) send(v); $('#cmd').value = ''; };
+$('#btnCfgRead').onclick = () => send('CFG');
+$('#btnCfgApply').onclick = applyCfg;
+$('#btnCfgClear').onclick = async () => { if (await ask('Rūpnīcas iestatījumi', 'Atjaunot firmware noklusējumus? Saglabāts tiks tikai ar SAVE.', 'Atjaunot')) { send('FACTORY'); setTimeout(() => send('CFG'), 300); } };
+$('#btnTmc').onclick = () => send('TMC');
+$('#btnRcSave').onclick = () => send(rcMapLine());
+$('#btnRcDef').onclick = async () => { if (await ask('Pults noklusējumi', 'Atjaunot pults funkciju piešķiršanu no programmas noklusējumiem?', 'Atjaunot')) send('#rcmap_def'); };
+$('#btnWifi').onclick = async () => {
+  if (await ask('Wi-Fi', 'Saglabāt Wi-Fi iestatījumus un restartēt tiltu?', 'Saglabāt')) send('#wifi\t' + $('#ssid').value.trim() + '\t' + $('#pass').value);
+};
+
+// status vecāks par 1.5 s -> kontrolieris neatbild
+setInterval(() => {
+  if (wsOk && performance.now() - st.at > 1500) badge('bState', 'kontrolieris klusē', 'warn');
+}, 500);
+
+renderJoints(false);
+renderCfg();
+renderPoints();
+connect();
+</script>
+</body>
+</html>

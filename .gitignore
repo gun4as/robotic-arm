@@ -1,0 +1,7 @@
+.pio/
+.vscode/
+# ģenerēts no web/index.html būves laikā
+firmware/esp32_bridge/src/web_index.h
+pc_app/.venv/
+__pycache__/
+virtual_eeprom.bin
