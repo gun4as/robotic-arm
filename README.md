@@ -2,9 +2,38 @@
 
 **Latviski** | [English](README.en.md)
 
-5 asu robotroka ar NEMA17 (17HM5417, 0.9°) motoriem un 9:1 cikloidālajiem reduktoriem.
+5 asu robotroka ar NEMA17 soļu motoriem (divu veidu: 17HM5417, 0.9°, un RB 17HD0004-6) un drukātiem reduktoriem —
+9:1 cikloidālo un 4:1 planetāro. Motora soļi un reduktors katrai locītavai ir iestatāmi atsevišķi.
 Vadība no **PC programmas** caur USB (kā Printrun), no **web pārlūka** (telefons/dators) vai no pārveidotas
 **Futaba RC pults** (ESP-NOW vai LoRa).
+
+![Darbagalds: Futaba T8J pults ar ESP32-S3 ekrānu, RAMPS, Wemos D1 mini tilts, motori ar reduktoriem un J1 pamatne](docs/foto/darbagalds.webp)
+*Pārbūvētā Futaba T8J pults („meklē roku…”), RAMPS 1.4, Wemos D1 mini tilts, motori ar drukātiem reduktoriem un J1 pamatne.*
+
+## Kā tas radās
+
+Pirms kādiem 13 gadiem es pats būvēju 3D printerus. Tagad uz galda stāv Bambu, bet no tiem laikiem
+plauktos palika kaudze detaļu: RAMPS un SKR plates, draiveri, NEMA17 motori, gala slēdži, barošanas bloki.
+Gadu gaitā tika izmēģināti visdažādākie kontrolieri un motori, un izmest to visu nebija prāta.
+Tā radās ideja: no tā, kas jau ir, uzbūvēt robotroku.
+
+Printera programmu rokai neizmantoju. Kopā ar AI asistentu Claude tika uzrakstīts savs firmware,
+kas strādā ar locītavām un grādiem, nevis XYZ asīm: gala slēdži ar HOME uz vidu, sinhronas kustības,
+mācīšana un atskaņošana. Tas pats kods iet gan uz vecā RAMPS 1.4, gan uz SKR V1.4 Turbo.
+
+Pultij ir savs stāsts. Futaba T8J raidītājs kādreiz cieta, kad kāds tajā ielika nepareizu bateriju,
+cik atceros, 2S 7.4 V, ko tur likt nedrīkstēja. Raidītājs nodega, bet mehānika palika lieliska:
+precīzi stiki, kvalitatīvi slēdži, ērts korpuss. Tāpēc elektroniku nomainīju pret ESP32-S3 ar
+krāsu ekrānu, un Futabas pogu plate strādā tālāk. Ironiski, tagad pults barojas tieši no 2S baterijas (2×18650 caur LM2596).
+
+**Stāvoklis:** elektronika, firmware, PC programma un pults jau strādā. Rokas mehānika vēl tikai top —
+pašlaik tiek testēti abi motoru veidi un abi reduktori (9:1 cikloidālais un 4:1 planetārais),
+lai saprastu, kas katrai locītavai der vislabāk.
+
+| | | |
+|---|---|---|
+| ![J1 pamatne](docs/foto/pamatne_j1.webp) | ![Reduktors uz motora](docs/foto/reduktors.webp) | ![RB 17HD0004-6](docs/foto/motors_17hd0004.webp) |
+| J1 pamatne ar gala slēdža turētāju | Drukāts reduktors uz motora | RB 17HD0004-6, partija 130403 — no printeru laikiem |
 
 ```mermaid
 flowchart LR

@@ -2,12 +2,41 @@
 
 [Latviski](README.md) | **English**
 
-A 5-axis robotic arm driven by NEMA17 steppers (17HM5417, 0.9°) through 9:1 cycloidal gearboxes, with
-its own firmware for RAMPS 1.4 / BTT SKR V1.4 Turbo. It can be controlled from a **PC application** over USB
+A 5-axis robotic arm driven by NEMA17 steppers (two types: 17HM5417, 0.9°, and RB 17HD0004-6) through 3D-printed
+gearboxes (9:1 cycloidal and 4:1 planetary; motor steps and gear ratio are set per joint), with its own firmware for RAMPS 1.4 / BTT SKR V1.4 Turbo. It can be controlled from a **PC application** over USB
 or the network (similar to Printrun), from a **web browser** (phone/PC) or from a rebuilt **Futaba T8J RC
 transmitter** (ESP32-S3, ESP-NOW).
 
 > Detailed documentation in [docs/](docs) is written in Latvian; the user interfaces are in Latvian as well.
+
+![Workbench: Futaba T8J remote with the ESP32-S3 screen, RAMPS, Wemos D1 mini bridge, motors with gearboxes and the J1 base](docs/foto/darbagalds.webp)
+*The rebuilt Futaba T8J remote (searching for the arm…), RAMPS 1.4, Wemos D1 mini bridge, motors with 3D-printed gearboxes and the J1 base.*
+
+## How it started
+
+About 13 years ago I was building my own 3D printers. These days there is a Bambu on the desk, but the
+shelves are still full of parts from those years: RAMPS and SKR boards, drivers, NEMA17 motors, endstops,
+power supplies. Over time I experimented with all kinds of controllers and motors, and throwing it all
+away never felt right. So the idea was simple: build a robotic arm from what is already there.
+
+I didn't use printer firmware for the arm. Together with the AI assistant Claude, a dedicated firmware was
+written that works with joints and degrees instead of XYZ axes: endstops with HOME to the middle position,
+synchronized moves, teach and playback. The same code runs on both the old RAMPS 1.4 and the SKR V1.4 Turbo.
+
+The remote has its own story. A Futaba T8J transmitter once got the wrong battery, as far as I remember a
+2S 7.4 V pack that it was never meant to take, and the transmitter burned out. The mechanics, however,
+were excellent: precise gimbals, good switches, a comfortable case. So the electronics were replaced with
+an ESP32-S3 and a colour screen, while the original Futaba button board keeps working. Now the remote
+Ironically, it now runs on a 2S battery (2×18650 through an LM2596).
+
+**Status:** the electronics, firmware, PC application and remote already work. The mechanics of the arm are
+still in progress: both motor types and both gearboxes (9:1 cycloidal and 4:1 planetary) are being tested to find out what suits
+each joint best.
+
+| | | |
+|---|---|---|
+| ![J1 base](docs/foto/pamatne_j1.webp) | ![Gearbox on a motor](docs/foto/reduktors.webp) | ![RB 17HD0004-6](docs/foto/motors_17hd0004.webp) |
+| J1 base with the endstop holder | 3D-printed gearbox on a motor | RB 17HD0004-6, lot 130403, left over from the printer days |
 
 ```mermaid
 flowchart LR
